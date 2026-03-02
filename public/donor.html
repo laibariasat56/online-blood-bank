@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Donor Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="dashboard">
+<h2>Donor Dashboard</h2>
+<div class="navbar">
+  <div>🩸 Blood Bank System</div>
+  <div>
+    <a href="/">Home</a>
+    <a href="/register.html">Register</a>
+    <a href="/login.html">Login</a>
+  </div>
+</div>
+<div class="card">
+<button onclick="donate()">Donate Blood</button>
+</div>
+
+<div class="card" id="notifications"></div>
+</div>
+
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+
+async function donate(){
+  const quantity = prompt("Enter Quantity:");
+  await fetch("/api/users/donate",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      donor_id:user.user_id,
+      quantity,
+      blood_group:user.blood_group
+    })
+  });
+  alert("Donation Added");
+}
+
+async function loadNotifications(){
+  const res = await fetch(`/api/users/notifications/donor`);
+  const data = await res.json();
+  notifications.innerHTML = data.map(n=>`<p>${n.message}</p>`).join("");
+}
+
+loadNotifications();
+</script>

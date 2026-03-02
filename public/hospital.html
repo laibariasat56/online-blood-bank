@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hospital Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="dashboard">
+<h2>Hospital Dashboard</h2>
+<div class="navbar">
+  <div>🩸 Blood Bank System</div>
+  <div>
+    <a href="/">Home</a>
+    <a href="/register.html">Register</a>
+    <a href="/login.html">Login</a>
+  </div>
+</div>
+<div class="card">
+<button onclick="requestBlood()">Request Blood</button>
+</div>
+</div>
+
+<script>
+const user = JSON.parse(localStorage.getItem("user"));
+
+async function requestBlood(){
+  const blood_group = prompt("Blood Group:");
+  const quantity = prompt("Quantity:");
+
+  await fetch("/api/users/request",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      hospital_id:user.user_id,
+      blood_group,
+      quantity
+    })
+  });
+
+  alert("Request Submitted");
+}
+</script>

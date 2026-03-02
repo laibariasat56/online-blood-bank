@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="navbar">
+  <div>🩸 Blood Bank System</div>
+  <div>
+    <a href="/">Home</a>
+    <a href="/register.html">Register</a>
+    <a href="/login.html">Login</a>
+  </div>
+</div>
+<div class="dashboard">
+<h2>Admin Dashboard</h2>
+
+<div class="card">
+<canvas id="stockChart"></canvas>
+</div>
+
+<div class="card">
+Total Donations: <span id="donations"></span><br>
+Total Requests: <span id="requests"></span>
+</div>
+</div>
+
+<script>
+async function loadAnalytics(){
+  const res = await fetch("/api/admin/analytics");
+  const data = await res.json();
+
+  document.getElementById("donations").innerText = data.donations;
+  document.getElementById("requests").innerText = data.requests;
+
+  const ctx = document.getElementById('stockChart');
+
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:data.stock.map(s=>s.blood_group),
+      datasets:[{
+        label:'Blood Stock',
+        data:data.stock.map(s=>s.quantity)
+      }]
+    }
+  });
+}
+
+loadAnalytics();
+</script>
+
+</body>
+</html>
