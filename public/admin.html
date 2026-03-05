@@ -6,6 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
 <div class="navbar">
   <div>🩸 Blood Bank System</div>
   <div>
@@ -14,20 +15,60 @@
     <a href="/login.html">Login</a>
   </div>
 </div>
+
 <div class="dashboard">
 <h2>Admin Dashboard</h2>
 
+<!-- Graph -->
 <div class="card">
-<canvas id="stockChart"></canvas>
+  <canvas id="stockChart"></canvas>
 </div>
 
+<!-- Totals -->
 <div class="card">
-Total Donations: <span id="donations"></span><br>
-Total Requests: <span id="requests"></span>
+  <strong>Total Donations:</strong> <span id="donations"></span><br>
+  <strong>Total Requests:</strong> <span id="requests"></span>
 </div>
+
+<!-- Donations Table -->
+<div class="card">
+<h3>Donation Records</h3>
+<table border="1" width="100%" id="donationTable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Blood Group</th>
+<th>Quantity</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<!-- Requests Table -->
+<div class="card">
+<h3>Blood Requests</h3>
+<table border="1" width="100%" id="requestTable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Blood Group</th>
+<th>Quantity</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
 </div>
 
 <script>
+
 async function loadAnalytics(){
   const res = await fetch("/api/admin/analytics");
   const data = await res.json();
@@ -49,7 +90,67 @@ async function loadAnalytics(){
   });
 }
 
+async function loadFullData(){
+  const res = await fetch("/api/admin/full-data");
+  const data = await res.json();
+
+  // Donation Table
+  const donationBody = document.querySelector("#donationTable tbody");
+  donationBody.innerHTML = "";
+
+  data.donations.forEach(d=>{
+    donationBody.innerHTML += `
+      <tr>
+        <td>${d.name}</td>
+        <td>${d.email}</td>
+        <td>${d.blood_group}</td>
+        <td>${d.quantity}</td>
+        <td>${d.donation_date}</td>
+      </tr>
+    `;
+  });
+
+  // Request Table
+  const requestBody = document.querySelector("#requestTable tbody");
+  requestBody.innerHTML = "";
+
+  data.requests.forEach(r=>{
+    requestBody.innerHTML += `
+      <tr>
+        <td>${r.name}</td>
+        <td>${r.email}</td>
+        <td>${r.blood_group}</td>
+        <td>${r.quantity}</td>
+        <td>${r.status}</td>
+        <td>
+          ${r.status === 'Pending' 
+            ? `<button onclick="approveRequest(${r.request_id}, '${r.blood_group}', ${r.quantity})">Approve</button>`
+            : '—'}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function approveRequest(id, blood_group, quantity){
+  const res = await fetch("/api/admin/approve",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      request_id:id,
+      blood_group:blood_group,
+      quantity:quantity
+    })
+  });
+
+  alert(await res.text());
+  loadAnalytics();
+  loadFullData();
+}
+
 loadAnalytics();
+loadFullData();
+
 </script>
 
 </body>
